@@ -1,0 +1,9 @@
+project:
+  output-dir: _docs
+
+website:
+  title: "nukds"
+  site-url: "https://santosh-rajan.github.io/nukds"
+  description: "NUK Data Science Library"
+  repo-branch: main
+  repo-url: "https://github.com/santosh-rajan/nukds"
