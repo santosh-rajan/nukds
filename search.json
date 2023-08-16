@@ -1,0 +1,51 @@
+[
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "nukds",
+    "section": "",
+    "text": "This file will become your README and also the index of your documentation."
+  },
+  {
+    "objectID": "index.html#install",
+    "href": "index.html#install",
+    "title": "nukds",
+    "section": "Install",
+    "text": "Install\npip install nukds"
+  },
+  {
+    "objectID": "index.html#how-to-use",
+    "href": "index.html#how-to-use",
+    "title": "nukds",
+    "section": "How to use",
+    "text": "How to use\n\nBigquery\nCreate a Client\n\nclient = create_client()\nclient.query(\"SELECT 1;\").to_dataframe()\n\n\n\n\n\n\n\n\nf0_\n\n\n\n\n0\n1"
+  },
+  {
+    "objectID": "bigquery.html",
+    "href": "bigquery.html",
+    "title": "Bigquery",
+    "section": "",
+    "text": "Note\n\n\n\nIf you are not using authentication scopes, then the following is equivalent to:\nfrom google.cloud import bigquery\nclient = bigquery.Client()\n\n\n\ndef create_client(\n    # key_path: str = None,\n    auth_scopes: [str] = [],  # eg: [\"bigquery\", \"drive\"]\n):\n    \"\"\"Create a BigQuery client with the given auth scopes.\"\"\"\n    if len(auth_scopes) == 0:\n        logger.debug(\"Using default BigQuery client\")\n        return bigquery.Client()\n    else:\n        # to pull files from drive or other services, we need to authenticate\n        import google.auth\n        credentials, project = google.auth.default(\n            [f\"https://www.googleapis.com/auth/{service}\" for service in auth_scopes]\n        )\n        logger.debug(f\"Using BigQuery client with auth scopes: {auth_scopes}\")\n        return bigquery.Client(\n            credentials=credentials,\n            project=project,\n        )\n\n\nsource\n\n\n\n create_client (auth_scopes:[&lt;class'str'&gt;]=[])\n\nCreate a BigQuery client with the given auth scopes.\n\n\n\n\nType\nDefault\nDetails\n\n\n\n\nauth_scopes\n[&lt;class ‘str’&gt;]\n[]\neg: [“bigquery”, “drive”]\n\n\n\ncreate_client() is a simple wrapper around bigquery.Client() that uses the GOOGLE_APPLICATION_CREDENTIALS environment variable to authenticate. This is the recommended way to authenticate with BigQuery.\nTo set up GOOGLE_APPLICATION_CREDENTIALS:\nexport GOOGLE_APPLICATION_CREDENTIALS=\"/path/to/key.json\"\n\n\n\n\n\n\nNote\n\n\n\nreplace /path/to/key.json with the path to your key file.\n\n\nBigquery Client Documentation"
+  },
+  {
+    "objectID": "bigquery.html#initilize-client-with-authentication-scopes",
+    "href": "bigquery.html#initilize-client-with-authentication-scopes",
+    "title": "Bigquery",
+    "section": "",
+    "text": "Note\n\n\n\nIf you are not using authentication scopes, then the following is equivalent to:\nfrom google.cloud import bigquery\nclient = bigquery.Client()\n\n\n\ndef create_client(\n    # key_path: str = None,\n    auth_scopes: [str] = [],  # eg: [\"bigquery\", \"drive\"]\n):\n    \"\"\"Create a BigQuery client with the given auth scopes.\"\"\"\n    if len(auth_scopes) == 0:\n        logger.debug(\"Using default BigQuery client\")\n        return bigquery.Client()\n    else:\n        # to pull files from drive or other services, we need to authenticate\n        import google.auth\n        credentials, project = google.auth.default(\n            [f\"https://www.googleapis.com/auth/{service}\" for service in auth_scopes]\n        )\n        logger.debug(f\"Using BigQuery client with auth scopes: {auth_scopes}\")\n        return bigquery.Client(\n            credentials=credentials,\n            project=project,\n        )\n\n\nsource\n\n\n\n create_client (auth_scopes:[&lt;class'str'&gt;]=[])\n\nCreate a BigQuery client with the given auth scopes.\n\n\n\n\nType\nDefault\nDetails\n\n\n\n\nauth_scopes\n[&lt;class ‘str’&gt;]\n[]\neg: [“bigquery”, “drive”]\n\n\n\ncreate_client() is a simple wrapper around bigquery.Client() that uses the GOOGLE_APPLICATION_CREDENTIALS environment variable to authenticate. This is the recommended way to authenticate with BigQuery.\nTo set up GOOGLE_APPLICATION_CREDENTIALS:\nexport GOOGLE_APPLICATION_CREDENTIALS=\"/path/to/key.json\"\n\n\n\n\n\n\nNote\n\n\n\nreplace /path/to/key.json with the path to your key file.\n\n\nBigquery Client Documentation"
+  },
+  {
+    "objectID": "bigquery.html#slot-memory-usage",
+    "href": "bigquery.html#slot-memory-usage",
+    "title": "Bigquery",
+    "section": "Slot Memory Usage",
+    "text": "Slot Memory Usage\n\ndef memory_usage(\n    query:str, # Query\n    client: bigquery.Client = None # BigQuery's Client Object\n) -&gt; str : # GB(s) required to process this query\n    \"\"\"Memory required to process this query\n    This number is the same that appears in the bigquery\n    console: \"This query will process _ when run.\"\n\n    \"\"\"\n    job_config = bigquery.QueryJobConfig(dry_run=True, use_query_cache=False)\n\n    if client:\n        query_job = client.query(query, job_config=job_config)\n    else:\n        with create_client() as client:\n            query_job = client.query(query, job_config=job_config)\n\n    _gb = query_job.total_bytes_processed / 2**30\n    return str(round(_gb, 2)) + \"GB\"\n\n\n# tests\nmemory_usage(\"SELECT 1;\")\n\n'0.0GB'"
+  },
+  {
+    "objectID": "bigquery.html#query-to-dataframe",
+    "href": "bigquery.html#query-to-dataframe",
+    "title": "Bigquery",
+    "section": "Query to Dataframe",
+    "text": "Query to Dataframe\n\ndef query_to_dataframe( sql: str, bq_client: bigquery.Client=None) -&gt; pd.DataFrame:\n    \"\"\"\n    Query -&gt; DataFrame\n    \"\"\"\n    logging.info(f\"Querying BigQuery: {sql}\")\n    if bq_client is None:\n        logging.debug(\"Creating new BigQuery client\")\n        with bigquery.Client() as bq_client:\n            dataframe = bq_client.query(sql).to_dataframe()\n    else:\n        dataframe = bq_client.query(sql).to_dataframe()\n\n    logging.info(f\"dataframe.shape: {dataframe.shape}\")\n    \n    return dataframe\n\n\nsource\n\nquery_to_dataframe\n\n query_to_dataframe (sql:str,\n                     bq_client:google.cloud.bigquery.client.Client=None)\n\nQuery -&gt; DataFrame\n\n# tests\ndisplay(query_to_dataframe(\"SELECT 1;\"))\nclient = bigquery.Client()\ndisplay(query_to_dataframe(\"SELECT 1;\", client))\n\n\n\n\n\n\n\n\nf0_\n\n\n\n\n0\n1\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nf0_\n\n\n\n\n0\n1"
+  }
+]
